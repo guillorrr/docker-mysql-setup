@@ -1,0 +1,24 @@
+services:
+  db:
+    image: mariadb:latest
+    container_name: ${APP_NAME}-db
+    volumes:
+      - ./db:/var/lib/mysql
+      - ./dump.sql.gz:/docker-entrypoint-initdb.d/dump.sql.gz
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${DB_NAME}
+      TZ: America/Argentina/Buenos_Aires
+
+  phpmyadmin:
+    depends_on:
+      - db
+    image: phpmyadmin/phpmyadmin:latest
+    container_name: ${APP_NAME}-phpmyadmin
+    ports:
+      - '${FORWARD_PHPMYADMIN_PORT:-8082}:80'
+    environment:
+      PMA_HOST: ${DB_HOST:-db}
+      PMA_PORT: ${FORWARD_DB_PORT:-3306}:3306
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      UPLOAD_LIMIT: 1G
